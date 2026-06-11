@@ -590,7 +590,7 @@ button {
   border-left: 4px solid var(--lime);
   border-radius: 6px;
   user-select: none;
-  touch-action: pan-down;
+  touch-action: pan-y;
 }
 
 .time-block-edit.time-block-compact {
