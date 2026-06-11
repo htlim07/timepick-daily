@@ -47,6 +47,9 @@ export function Timeline({
   const pointerYRef = useRef(0);
   const selectionCancelledRef = useRef(false);
   const autoScrollFrameRef = useRef<number | null>(null);
+  const touchPointersRef = useRef(new Map<number, number>());
+  const twoFingerCenterYRef = useRef<number | null>(null);
+  const isTwoFingerGestureRef = useRef(false);
 
   useEffect(() => {
     if (mode !== "main") return;
@@ -172,6 +175,31 @@ export function Timeline({
     onCreate?.(startMinute, endMinute);
   };
 
+  const getTouchCenterY = () => {
+    const positions = [...touchPointersRef.current.values()];
+    return positions.reduce((sum, position) => sum + position, 0) / positions.length;
+  };
+
+  const endPointer = (pointerId: number) => {
+    touchPointersRef.current.delete(pointerId);
+
+    if (isTwoFingerGestureRef.current) {
+      twoFingerCenterYRef.current =
+        touchPointersRef.current.size >= 2 ? getTouchCenterY() : null;
+      if (touchPointersRef.current.size === 0) {
+        isTwoFingerGestureRef.current = false;
+      }
+      resetGesture();
+      return;
+    }
+
+    if (selectionCancelledRef.current) {
+      resetGesture();
+      return;
+    }
+    finishSelection(selectionRef.current);
+  };
+
   if (mode === "main") {
     return (
       <div className="main-timeline">
@@ -221,6 +249,18 @@ export function Timeline({
         onPointerDown={(event) => {
           if (event.button !== 0) return;
           event.currentTarget.setPointerCapture(event.pointerId);
+
+          if (event.pointerType === "touch") {
+            touchPointersRef.current.set(event.pointerId, event.clientY);
+            if (touchPointersRef.current.size >= 2) {
+              isTwoFingerGestureRef.current = true;
+              twoFingerCenterYRef.current = getTouchCenterY();
+              activePointerRef.current = null;
+              cancelSelection(true);
+              return;
+            }
+          }
+
           const slot = slotFromPointer(event.clientY);
           activePointerRef.current = event.pointerId;
           selectionStartRef.current = slot;
@@ -232,6 +272,20 @@ export function Timeline({
           autoScrollFrameRef.current = window.requestAnimationFrame(runAutoScroll);
         }}
         onPointerMove={(event) => {
+          if (event.pointerType === "touch" && touchPointersRef.current.has(event.pointerId)) {
+            touchPointersRef.current.set(event.pointerId, event.clientY);
+          }
+
+          if (isTwoFingerGestureRef.current && touchPointersRef.current.size >= 2) {
+            const centerY = getTouchCenterY();
+            const previousCenterY = twoFingerCenterYRef.current;
+            if (previousCenterY !== null) {
+              window.scrollBy(0, previousCenterY - centerY);
+            }
+            twoFingerCenterYRef.current = centerY;
+            return;
+          }
+
           if (
             activePointerRef.current !== event.pointerId ||
             !event.currentTarget.hasPointerCapture(event.pointerId)
@@ -241,14 +295,8 @@ export function Timeline({
           pointerYRef.current = event.clientY;
           updateSelection(slotFromPointer(event.clientY));
         }}
-        onPointerUp={() => {
-          if (selectionCancelledRef.current) {
-            resetGesture();
-            return;
-          }
-          finishSelection(selectionRef.current);
-        }}
-        onPointerCancel={resetGesture}
+        onPointerUp={(event) => endPointer(event.pointerId)}
+        onPointerCancel={(event) => endPointer(event.pointerId)}
       >
         {slots.map((slot) => (
           <div
