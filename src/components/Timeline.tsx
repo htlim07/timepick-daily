@@ -9,7 +9,7 @@ import {
   SLOT_COUNT,
   SLOT_MINUTES,
 } from "../utils/time";
-import { TimeBlock } from "./TimeBlock";
+import { CANCEL_BLOCK_LONG_PRESS_EVENT, TimeBlock } from "./TimeBlock";
 
 type TimelineProps = {
   blocks: ScheduleBlock[];
@@ -257,6 +257,7 @@ export function Timeline({
               twoFingerCenterYRef.current = getTouchCenterY();
               activePointerRef.current = null;
               cancelSelection(true);
+              window.dispatchEvent(new Event(CANCEL_BLOCK_LONG_PRESS_EVENT));
               return;
             }
           }

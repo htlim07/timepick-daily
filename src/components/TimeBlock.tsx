@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ScheduleBlock } from "../types/schedule";
 import { EDIT_SLOT_HEIGHT, formatRange, MAIN_SLOT_HEIGHT, SLOT_MINUTES } from "../utils/time";
 
@@ -9,6 +9,8 @@ type TimeBlockProps = {
   onClick?: () => void;
   onEdit?: () => void;
 };
+
+export const CANCEL_BLOCK_LONG_PRESS_EVENT = "timeline-cancel-block-long-press";
 
 export function TimeBlock({ block, mode, isCurrent = false, onClick, onEdit }: TimeBlockProps) {
   const longPressTimer = useRef<number | null>(null);
@@ -30,6 +32,11 @@ export function TimeBlock({ block, mode, isCurrent = false, onClick, onEdit }: T
       longPressTimer.current = null;
     }
   };
+
+  useEffect(() => {
+    window.addEventListener(CANCEL_BLOCK_LONG_PRESS_EVENT, cancelLongPress);
+    return () => window.removeEventListener(CANCEL_BLOCK_LONG_PRESS_EVENT, cancelLongPress);
+  }, []);
 
   const showMobileTooltip = () => {
     setShowTooltip(true);
@@ -64,7 +71,7 @@ export function TimeBlock({ block, mode, isCurrent = false, onClick, onEdit }: T
           }
         }}
         onPointerDown={(event) => {
-          event.stopPropagation();
+          if (event.pointerType !== "touch") event.stopPropagation();
           longPressTimer.current = window.setTimeout(() => {
             didLongPress.current = true;
             if (mode === "edit") onEdit?.();
