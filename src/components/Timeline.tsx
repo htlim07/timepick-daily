@@ -245,7 +245,7 @@ export function Timeline({
       </div>
       <div
         ref={timelineRef}
-        className="edit-track"
+        className="edit-track-stack"
         onPointerDown={(event) => {
           if (event.button !== 0) return;
           const startedOnBlock =
@@ -306,28 +306,32 @@ export function Timeline({
         onPointerUp={(event) => endPointer(event.pointerId)}
         onPointerCancel={(event) => endPointer(event.pointerId)}
       >
-        {slots.map((slot) => (
-          <div
-            className={`timeline-slot ${slot % 6 === 0 ? "hour-slot" : ""}`}
-            key={slot}
-            style={{ height: `${EDIT_SLOT_HEIGHT}px` }}
-          />
-        ))}
-        {selection && (
-          <div
-            className="selection-preview"
-            style={{
-              top: `${selection.startIndex * EDIT_SLOT_HEIGHT}px`,
-              height: `${(selection.endIndex - selection.startIndex) * EDIT_SLOT_HEIGHT}px`,
-            }}
-          >
-            {formatTime(selection.startIndex * SLOT_MINUTES)} -{" "}
-            {formatTime(selection.endIndex * SLOT_MINUTES)}
-          </div>
-        )}
-        {blocks.map((block) => (
-          <TimeBlock key={block.id} block={block} mode="edit" onEdit={() => onEdit?.(block)} />
-        ))}
+        <div className="edit-track">
+          {slots.map((slot) => (
+            <div
+              className={`timeline-slot ${slot % 6 === 0 ? "hour-slot" : ""}`}
+              key={slot}
+              style={{ height: `${EDIT_SLOT_HEIGHT}px` }}
+            />
+          ))}
+          {selection && (
+            <div
+              className="selection-preview"
+              style={{
+                top: `${selection.startIndex * EDIT_SLOT_HEIGHT}px`,
+                height: `${(selection.endIndex - selection.startIndex) * EDIT_SLOT_HEIGHT}px`,
+              }}
+            >
+              {formatTime(selection.startIndex * SLOT_MINUTES)} -{" "}
+              {formatTime(selection.endIndex * SLOT_MINUTES)}
+            </div>
+          )}
+        </div>
+        <div className="edit-block-layer">
+          {blocks.map((block) => (
+            <TimeBlock key={block.id} block={block} mode="edit" onEdit={() => onEdit?.(block)} />
+          ))}
+        </div>
       </div>
     </div>
   );

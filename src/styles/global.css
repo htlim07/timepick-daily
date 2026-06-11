@@ -561,15 +561,34 @@ button {
   right: 12px;
 }
 
-.edit-track {
+.edit-track-stack {
   position: relative;
   height: 2880px;
+}
+
+.edit-track {
+  position: absolute;
+  inset: 0;
+  height: 100%;
   /*
    * A finger moving upward pans the page down. The opposite direction remains
    * available to Pointer Events for creating a schedule block.
    */
   touch-action: pan-down;
   background: rgba(239, 240, 233, 0.72);
+}
+
+.edit-block-layer {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  height: 100%;
+  touch-action: pan-y;
+  pointer-events: none;
+}
+
+.edit-block-layer .time-block-position {
+  pointer-events: auto;
 }
 
 .timeline-slot {
@@ -581,7 +600,6 @@ button {
 }
 
 .time-block-edit {
-  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
