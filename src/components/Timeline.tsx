@@ -248,13 +248,17 @@ export function Timeline({
         className="edit-track"
         onPointerDown={(event) => {
           if (event.button !== 0) return;
-          event.currentTarget.setPointerCapture(event.pointerId);
+          const startedOnBlock =
+            event.target instanceof Element && event.target.closest(".time-block-edit") !== null;
 
           if (event.pointerType === "touch") {
             touchPointersRef.current.set(event.pointerId, event.clientY);
             if (touchPointersRef.current.size >= 2) {
               isTwoFingerGestureRef.current = true;
               twoFingerCenterYRef.current = getTouchCenterY();
+              for (const pointerId of touchPointersRef.current.keys()) {
+                event.currentTarget.setPointerCapture(pointerId);
+              }
               activePointerRef.current = null;
               cancelSelection(true);
               window.dispatchEvent(new Event(CANCEL_BLOCK_LONG_PRESS_EVENT));
@@ -262,6 +266,9 @@ export function Timeline({
             }
           }
 
+          if (startedOnBlock) return;
+
+          event.currentTarget.setPointerCapture(event.pointerId);
           const slot = slotFromPointer(event.clientY);
           activePointerRef.current = event.pointerId;
           selectionStartRef.current = slot;

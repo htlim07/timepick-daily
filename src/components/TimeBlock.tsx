@@ -11,11 +11,15 @@ type TimeBlockProps = {
 };
 
 export const CANCEL_BLOCK_LONG_PRESS_EVENT = "timeline-cancel-block-long-press";
+const TAP_MOVE_THRESHOLD = 8;
 
 export function TimeBlock({ block, mode, isCurrent = false, onClick, onEdit }: TimeBlockProps) {
   const longPressTimer = useRef<number | null>(null);
   const tooltipTimer = useRef<number | null>(null);
   const didLongPress = useRef(false);
+  const tapPointerRef = useRef<number | null>(null);
+  const tapStartRef = useRef({ x: 0, y: 0 });
+  const tapCancelledRef = useRef(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const duration = block.endMinute - block.startMinute;
   const size = duration < 30 ? "compact" : "full";
@@ -33,9 +37,24 @@ export function TimeBlock({ block, mode, isCurrent = false, onClick, onEdit }: T
     }
   };
 
+  const cancelTap = () => {
+    tapCancelledRef.current = true;
+    tapPointerRef.current = null;
+    cancelLongPress();
+  };
+
   useEffect(() => {
-    window.addEventListener(CANCEL_BLOCK_LONG_PRESS_EVENT, cancelLongPress);
-    return () => window.removeEventListener(CANCEL_BLOCK_LONG_PRESS_EVENT, cancelLongPress);
+    const handleCancelTap = () => {
+      tapCancelledRef.current = true;
+      tapPointerRef.current = null;
+      if (longPressTimer.current !== null) {
+        window.clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+    };
+
+    window.addEventListener(CANCEL_BLOCK_LONG_PRESS_EVENT, handleCancelTap);
+    return () => window.removeEventListener(CANCEL_BLOCK_LONG_PRESS_EVENT, handleCancelTap);
   }, []);
 
   const showMobileTooltip = () => {
@@ -72,15 +91,41 @@ export function TimeBlock({ block, mode, isCurrent = false, onClick, onEdit }: T
         }}
         onPointerDown={(event) => {
           if (event.pointerType !== "touch") event.stopPropagation();
+
+          if (mode === "edit" && event.pointerType === "touch") {
+            tapPointerRef.current = event.pointerId;
+            tapStartRef.current = { x: event.clientX, y: event.clientY };
+            tapCancelledRef.current = false;
+            return;
+          }
+
           longPressTimer.current = window.setTimeout(() => {
             didLongPress.current = true;
-            if (mode === "edit") onEdit?.();
-            else showMobileTooltip();
+            showMobileTooltip();
           }, 550);
         }}
-        onPointerUp={cancelLongPress}
-        onPointerCancel={cancelLongPress}
-        onPointerMove={cancelLongPress}
+        onPointerUp={(event) => {
+          if (mode === "edit" && event.pointerType === "touch") {
+            const shouldEdit =
+              tapPointerRef.current === event.pointerId && !tapCancelledRef.current;
+            cancelTap();
+            if (shouldEdit) onEdit?.();
+            return;
+          }
+          cancelLongPress();
+        }}
+        onPointerCancel={cancelTap}
+        onPointerMove={(event) => {
+          if (mode === "edit" && tapPointerRef.current === event.pointerId) {
+            const distance = Math.hypot(
+              event.clientX - tapStartRef.current.x,
+              event.clientY - tapStartRef.current.y,
+            );
+            if (distance > TAP_MOVE_THRESHOLD) cancelTap();
+            return;
+          }
+          cancelLongPress();
+        }}
       >
         <strong>{block.title}</strong>
         {showTimeInside && (
