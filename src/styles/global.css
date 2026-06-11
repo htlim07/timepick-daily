@@ -564,7 +564,11 @@ button {
 .edit-track {
   position: relative;
   height: 2880px;
-  touch-action: none;
+  /*
+   * A finger moving upward pans the page down. The opposite direction remains
+   * available to Pointer Events for creating a schedule block.
+   */
+  touch-action: pan-down;
   background: rgba(239, 240, 233, 0.72);
 }
 
@@ -586,7 +590,7 @@ button {
   border-left: 4px solid var(--lime);
   border-radius: 6px;
   user-select: none;
-  touch-action: none;
+  touch-action: pan-down;
 }
 
 .time-block-edit.time-block-compact {
