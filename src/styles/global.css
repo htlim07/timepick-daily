@@ -583,11 +583,7 @@ button {
   position: absolute;
   inset: 0;
   height: 100%;
-  /*
-   * A finger moving upward pans the page down. The opposite direction remains
-   * available to Pointer Events for creating a schedule block.
-   */
-  touch-action: pan-down;
+  touch-action: none;
   background: rgba(239, 240, 233, 0.72);
 }
 

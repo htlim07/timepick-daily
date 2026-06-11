@@ -44,6 +44,9 @@ export function Timeline({
   const selectionRef = useRef<Selection | null>(null);
   const selectionStartRef = useRef<number | null>(null);
   const activePointerRef = useRef<number | null>(null);
+  const pointerStartYRef = useRef(0);
+  const previousPointerYRef = useRef(0);
+  const isManualScrollRef = useRef(false);
   const pointerYRef = useRef(0);
   const selectionCancelledRef = useRef(false);
   const autoScrollFrameRef = useRef<number | null>(null);
@@ -153,6 +156,7 @@ export function Timeline({
   const resetGesture = () => {
     activePointerRef.current = null;
     selectionStartRef.current = null;
+    isManualScrollRef.current = false;
     selectionCancelledRef.current = false;
     selectionRef.current = null;
     setSelection(null);
@@ -272,6 +276,9 @@ export function Timeline({
           const slot = slotFromPointer(event.clientY);
           activePointerRef.current = event.pointerId;
           selectionStartRef.current = slot;
+          pointerStartYRef.current = event.clientY;
+          previousPointerYRef.current = event.clientY;
+          isManualScrollRef.current = false;
           selectionCancelledRef.current = false;
           pointerYRef.current = event.clientY;
           selectionRef.current = null;
@@ -300,11 +307,27 @@ export function Timeline({
           ) {
             return;
           }
+
+          if (
+            isManualScrollRef.current ||
+            event.clientY < pointerStartYRef.current
+          ) {
+            isManualScrollRef.current = true;
+            cancelSelection(true);
+            window.scrollBy(0, previousPointerYRef.current - event.clientY);
+            previousPointerYRef.current = event.clientY;
+            return;
+          }
+
           pointerYRef.current = event.clientY;
+          previousPointerYRef.current = event.clientY;
           updateSelection(slotFromPointer(event.clientY));
         }}
         onPointerUp={(event) => endPointer(event.pointerId)}
-        onPointerCancel={(event) => endPointer(event.pointerId)}
+        onPointerCancel={(event) => {
+          touchPointersRef.current.delete(event.pointerId);
+          resetGesture();
+        }}
       >
         <div className="edit-track">
           {slots.map((slot) => (
