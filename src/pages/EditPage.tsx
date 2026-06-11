@@ -83,17 +83,19 @@ export function EditPage({ onDone, onCancel }: EditPageProps) {
         />
       )}
 
-      <div className="bottom-bar">
-        <BottomButton
-          onClick={() => {
-            commitDraft();
-            onDone();
-          }}
-        >
-          <span>이 일정으로 시작하기</span>
-          <span>✓</span>
-        </BottomButton>
-      </div>
+      {!modal && (
+        <div className="bottom-bar">
+          <BottomButton
+            onClick={() => {
+              commitDraft();
+              onDone();
+            }}
+          >
+            <span>이 일정으로 시작하기</span>
+            <span>✓</span>
+          </BottomButton>
+        </div>
+      )}
     </main>
   );
 }
