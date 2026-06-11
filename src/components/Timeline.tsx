@@ -28,6 +28,7 @@ type Selection = {
 const slots = Array.from({ length: SLOT_COUNT }, (_, index) => index);
 const EDGE_THRESHOLD = 80;
 const MAX_SCROLL_SPEED = 12;
+const MAX_GESTURE_SCROLL_PER_FRAME = 32;
 
 export function Timeline({
   blocks,
@@ -53,6 +54,8 @@ export function Timeline({
   const touchPointersRef = useRef(new Map<number, number>());
   const twoFingerCenterYRef = useRef<number | null>(null);
   const isTwoFingerGestureRef = useRef(false);
+  const gestureScrollDeltaRef = useRef(0);
+  const gestureScrollFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (mode !== "main") return;
@@ -65,6 +68,9 @@ export function Timeline({
   useEffect(() => () => {
     if (autoScrollFrameRef.current !== null) {
       window.cancelAnimationFrame(autoScrollFrameRef.current);
+    }
+    if (gestureScrollFrameRef.current !== null) {
+      window.cancelAnimationFrame(gestureScrollFrameRef.current);
     }
   }, []);
 
@@ -87,6 +93,38 @@ export function Timeline({
     if (autoScrollFrameRef.current !== null) {
       window.cancelAnimationFrame(autoScrollFrameRef.current);
       autoScrollFrameRef.current = null;
+    }
+  };
+
+  const stopGestureScroll = () => {
+    if (gestureScrollFrameRef.current !== null) {
+      window.cancelAnimationFrame(gestureScrollFrameRef.current);
+      gestureScrollFrameRef.current = null;
+    }
+    gestureScrollDeltaRef.current = 0;
+  };
+
+  const flushGestureScroll = () => {
+    const delta = Math.max(
+      -MAX_GESTURE_SCROLL_PER_FRAME,
+      Math.min(MAX_GESTURE_SCROLL_PER_FRAME, gestureScrollDeltaRef.current),
+    );
+    gestureScrollDeltaRef.current -= delta;
+
+    if (delta !== 0) window.scrollBy(0, delta);
+
+    if (Math.abs(gestureScrollDeltaRef.current) >= 0.5) {
+      gestureScrollFrameRef.current = window.requestAnimationFrame(flushGestureScroll);
+    } else {
+      gestureScrollDeltaRef.current = 0;
+      gestureScrollFrameRef.current = null;
+    }
+  };
+
+  const queueGestureScroll = (delta: number) => {
+    gestureScrollDeltaRef.current += delta;
+    if (gestureScrollFrameRef.current === null) {
+      gestureScrollFrameRef.current = window.requestAnimationFrame(flushGestureScroll);
     }
   };
 
@@ -161,6 +199,9 @@ export function Timeline({
     selectionRef.current = null;
     setSelection(null);
     stopAutoScroll();
+    if (!isTwoFingerGestureRef.current && !isManualScrollRef.current) {
+      stopGestureScroll();
+    }
   };
 
   const finishSelection = (finalSelection: Selection | null) => {
@@ -192,6 +233,7 @@ export function Timeline({
         touchPointersRef.current.size >= 2 ? getTouchCenterY() : null;
       if (touchPointersRef.current.size === 0) {
         isTwoFingerGestureRef.current = false;
+        stopGestureScroll();
       }
       resetGesture();
       return;
@@ -261,7 +303,11 @@ export function Timeline({
               isTwoFingerGestureRef.current = true;
               twoFingerCenterYRef.current = getTouchCenterY();
               for (const pointerId of touchPointersRef.current.keys()) {
-                event.currentTarget.setPointerCapture(pointerId);
+                try {
+                  event.currentTarget.setPointerCapture(pointerId);
+                } catch {
+                  // iOS may cancel a pointer before the second touch is registered.
+                }
               }
               activePointerRef.current = null;
               cancelSelection(true);
@@ -295,7 +341,7 @@ export function Timeline({
             const centerY = getTouchCenterY();
             const previousCenterY = twoFingerCenterYRef.current;
             if (previousCenterY !== null) {
-              window.scrollBy(0, previousCenterY - centerY);
+              queueGestureScroll(previousCenterY - centerY);
             }
             twoFingerCenterYRef.current = centerY;
             return;
@@ -314,7 +360,7 @@ export function Timeline({
           ) {
             isManualScrollRef.current = true;
             cancelSelection(true);
-            window.scrollBy(0, previousPointerYRef.current - event.clientY);
+            queueGestureScroll(previousPointerYRef.current - event.clientY);
             previousPointerYRef.current = event.clientY;
             return;
           }
@@ -326,6 +372,10 @@ export function Timeline({
         onPointerUp={(event) => endPointer(event.pointerId)}
         onPointerCancel={(event) => {
           touchPointersRef.current.delete(event.pointerId);
+          if (touchPointersRef.current.size === 0) {
+            isTwoFingerGestureRef.current = false;
+            stopGestureScroll();
+          }
           resetGesture();
         }}
       >
