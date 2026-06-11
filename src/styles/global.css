@@ -559,6 +559,17 @@ button {
   grid-template-columns: 78px 1fr;
 }
 
+.edit-timeline-shell,
+.edit-time-labels,
+.edit-track-stack,
+.edit-track,
+.edit-block-layer,
+.timeline-slot {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .edit-time-labels span {
   right: 12px;
 }
