@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import type { ScheduleBlock } from "../types/schedule";
+import type { BlockColor, ScheduleBlock } from "../types/schedule";
+import { BLOCK_COLOR_OPTIONS } from "../utils/colors";
 import { formatRange } from "../utils/time";
 
 type ScheduleModalProps = {
   block: ScheduleBlock;
   mode: "create" | "edit";
-  onConfirm: (title: string) => void;
+  onConfirm: (title: string, selectedColor: BlockColor | null) => void;
   onDelete: () => void;
   onClose: () => void;
 };
@@ -18,10 +19,14 @@ export function ScheduleModal({
   onClose,
 }: ScheduleModalProps) {
   const [title, setTitle] = useState(block.title);
+  const [selectedColor, setSelectedColor] = useState<BlockColor | null>(
+    mode === "create" ? null : block.color,
+  );
 
   useEffect(() => {
     setTitle(block.title);
-  }, [block]);
+    setSelectedColor(mode === "create" ? null : block.color);
+  }, [block, mode]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -54,7 +59,7 @@ export function ScheduleModal({
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            if (title.trim()) onConfirm(title.trim());
+            if (title.trim()) onConfirm(title.trim(), selectedColor);
           }}
         >
           <input
@@ -64,6 +69,36 @@ export function ScheduleModal({
             placeholder="예: 아침 운동"
             maxLength={40}
           />
+          <fieldset className="color-picker">
+            <legend>색상</legend>
+            <div className="color-options">
+              <button
+                className={`auto-color-button ${selectedColor === null ? "is-selected" : ""}`}
+                onClick={() => setSelectedColor(null)}
+                type="button"
+                aria-pressed={selectedColor === null}
+              >
+                자동
+              </button>
+              {BLOCK_COLOR_OPTIONS.map(({ color, label }) => (
+                <button
+                  key={color}
+                  className={`color-option ${selectedColor === color ? "is-selected" : ""}`}
+                  style={{ backgroundColor: `var(--block-${color})` }}
+                  onClick={() => setSelectedColor(color)}
+                  type="button"
+                  aria-label={label}
+                  aria-pressed={selectedColor === color}
+                  title={label}
+                >
+                  {selectedColor === color ? "✓" : ""}
+                </button>
+              ))}
+            </div>
+            <span className="color-picker-help">
+              {selectedColor === null ? "주변 일정과 겹치지 않는 색상을 자동으로 선택합니다." : "선택한 색상으로 표시합니다."}
+            </span>
+          </fieldset>
           <div className="modal-actions">
             {mode === "edit" && (
               <button className="delete-button" onClick={onDelete} type="button">

@@ -4,9 +4,22 @@ export const BLOCK_COLORS: BlockColor[] = [
   "blue",
   "green",
   "purple",
-  "orange",
+  "yellow",
   "pink",
   "teal",
+  "orange",
+  "gray",
+];
+
+export const BLOCK_COLOR_OPTIONS: { color: BlockColor; label: string }[] = [
+  { color: "blue", label: "파랑" },
+  { color: "green", label: "초록" },
+  { color: "purple", label: "보라" },
+  { color: "yellow", label: "노랑" },
+  { color: "pink", label: "분홍" },
+  { color: "teal", label: "청록" },
+  { color: "orange", label: "주황" },
+  { color: "gray", label: "회색" },
 ];
 
 export function getNextBlockColor(

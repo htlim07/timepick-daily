@@ -76,8 +76,17 @@ export function EditPage({ onDone, onCancel }: EditPageProps) {
             removeDraft(modal.block.id);
             setModal(null);
           }}
-          onConfirm={(title) => {
-            updateDraft(modal.block.id, title);
+          onConfirm={(title, selectedColor) => {
+            const color =
+              selectedColor ??
+              (modal.mode === "create"
+                ? modal.block.color
+                : getNextBlockColor(
+                    draftBlocks.filter((block) => block.id !== modal.block.id),
+                    modal.block.startMinute,
+                    modal.block.endMinute,
+                  ));
+            updateDraft(modal.block.id, title, color);
             setModal(null);
           }}
         />

@@ -18,9 +18,11 @@
   --block-blue: #2563a9;
   --block-green: #2f7d52;
   --block-purple: #7651a8;
-  --block-orange: #c96625;
+  --block-yellow: #d59b16;
   --block-pink: #b84f78;
   --block-teal: #167b7d;
+  --block-orange: #d26424;
+  --block-gray: #64748b;
 }
 
 * {
@@ -709,6 +711,70 @@ button {
 .schedule-modal input:focus {
   border-color: var(--green);
   box-shadow: 0 0 0 3px rgba(32, 93, 67, 0.09);
+}
+
+.color-picker {
+  margin: 18px 0 0;
+  border: 0;
+  padding: 0;
+}
+
+.color-picker legend {
+  margin-bottom: 10px;
+  padding: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.color-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+
+.color-option,
+.auto-color-button {
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px rgba(29, 40, 35, 0.15);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.color-option {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.auto-color-button {
+  min-height: 34px;
+  border-radius: 99px;
+  padding: 5px 12px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  background: white;
+}
+
+.color-option.is-selected,
+.auto-color-button.is-selected {
+  border-color: white;
+  box-shadow: 0 0 0 3px var(--ink);
+  transform: scale(1.06);
+}
+
+.color-picker-help {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .modal-actions {

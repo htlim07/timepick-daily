@@ -1,4 +1,12 @@
-export type BlockColor = "blue" | "green" | "purple" | "orange" | "pink" | "teal";
+export type BlockColor =
+  | "blue"
+  | "green"
+  | "purple"
+  | "yellow"
+  | "pink"
+  | "teal"
+  | "orange"
+  | "gray";
 
 export type ScheduleBlock = {
   id: string;
