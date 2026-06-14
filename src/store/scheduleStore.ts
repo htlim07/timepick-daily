@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { BlockColor, ScheduleBlock } from "../types/schedule";
+import type { ScheduleBlock } from "../types/schedule";
 import { BLOCK_COLORS } from "../utils/colors";
 import { DAY_MINUTES } from "../utils/time";
 
@@ -61,7 +61,10 @@ type ScheduleState = {
   draftBlocks: ScheduleBlock[];
   beginEdit: () => void;
   addDraft: (block: ScheduleBlock) => void;
-  updateDraft: (id: string, title: string, color: BlockColor) => void;
+  updateDraft: (
+    id: string,
+    updates: Pick<ScheduleBlock, "title" | "color" | "startMinute" | "endMinute">,
+  ) => void;
   removeDraft: (id: string) => void;
   commitDraft: () => void;
   toggleDone: (id: string) => void;
@@ -77,10 +80,10 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
     })),
   addDraft: (block) =>
     set((state) => ({ draftBlocks: [...state.draftBlocks, block] })),
-  updateDraft: (id, title, color) =>
+  updateDraft: (id, updates) =>
     set((state) => ({
       draftBlocks: state.draftBlocks.map((block) =>
-        block.id === id ? { ...block, title, color } : block,
+        block.id === id ? { ...block, ...updates } : block,
       ),
     })),
   removeDraft: (id) =>

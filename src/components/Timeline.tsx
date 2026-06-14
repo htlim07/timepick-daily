@@ -289,9 +289,10 @@ export function Timeline({
           </span>
         ))}
       </div>
-      <div
-        ref={timelineRef}
-        className="edit-track-stack"
+      <div className="edit-timeline-layout">
+        <div
+          ref={timelineRef}
+          className="edit-track-stack timeline-interaction-area"
         onPointerDown={(event) => {
           if (event.button !== 0) return;
           const startedOnBlock =
@@ -405,6 +406,8 @@ export function Timeline({
             <TimeBlock key={block.id} block={block} mode="edit" onEdit={() => onEdit?.(block)} />
           ))}
         </div>
+        </div>
+        <div className="scroll-gutter" aria-label="스크롤 영역" />
       </div>
     </div>
   );

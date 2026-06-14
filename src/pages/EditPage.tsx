@@ -5,6 +5,7 @@ import { Timeline } from "../components/Timeline";
 import { useScheduleStore } from "../store/scheduleStore";
 import type { ScheduleBlock } from "../types/schedule";
 import { getNextBlockColor } from "../utils/colors";
+import { blocksOverlap } from "../utils/time";
 
 type EditPageProps = {
   onDone: () => void;
@@ -70,23 +71,31 @@ export function EditPage({ onDone, onCancel }: EditPageProps) {
       {modal && (
         <ScheduleModal
           block={modal.block}
+          blocks={draftBlocks}
           mode={modal.mode}
           onClose={closeModal}
           onDelete={() => {
             removeDraft(modal.block.id);
             setModal(null);
           }}
-          onConfirm={(title, selectedColor) => {
+          onConfirm={(title, selectedColor, startMinute, endMinute) => {
+            if (
+              endMinute <= startMinute ||
+              blocksOverlap(startMinute, endMinute, draftBlocks, modal.block.id)
+            ) {
+              showOverlapNotice();
+              return;
+            }
             const color =
               selectedColor ??
               (modal.mode === "create"
                 ? modal.block.color
                 : getNextBlockColor(
                     draftBlocks.filter((block) => block.id !== modal.block.id),
-                    modal.block.startMinute,
-                    modal.block.endMinute,
+                    startMinute,
+                    endMinute,
                   ));
-            updateDraft(modal.block.id, title, color);
+            updateDraft(modal.block.id, { title, color, startMinute, endMinute });
             setModal(null);
           }}
         />

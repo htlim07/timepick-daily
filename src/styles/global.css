@@ -39,7 +39,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -559,8 +560,15 @@ button {
   grid-template-columns: 78px 1fr;
 }
 
+.edit-timeline-layout {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) 60px;
+}
+
 .edit-timeline-shell,
 .edit-time-labels,
+.edit-timeline-layout,
 .edit-track-stack,
 .edit-track,
 .edit-block-layer,
@@ -577,6 +585,23 @@ button {
 .edit-track-stack {
   position: relative;
   height: 2880px;
+}
+
+.scroll-gutter {
+  position: relative;
+  min-width: 60px;
+  border-left: 1px solid rgba(58, 76, 65, 0.1);
+  background-color: #e6e7e3;
+  background-image: linear-gradient(
+    to right,
+    transparent calc(50% - 11px),
+    rgba(70, 82, 75, 0.13) calc(50% - 11px) calc(50% + 11px),
+    transparent calc(50% + 11px)
+  );
+  background-position: center 22px;
+  background-size: 100% 52px;
+  background-repeat: repeat-y;
+  touch-action: pan-y;
 }
 
 .edit-track {
@@ -705,7 +730,8 @@ button {
   font-weight: 500;
 }
 
-.schedule-modal input {
+.schedule-modal input,
+.schedule-modal select {
   width: 100%;
   border: 1px solid #d8dad2;
   border-radius: 12px;
@@ -715,9 +741,38 @@ button {
   background: white;
 }
 
-.schedule-modal input:focus {
+.schedule-modal input:focus,
+.schedule-modal select:focus {
   border-color: var(--green);
   box-shadow: 0 0 0 3px rgba(32, 93, 67, 0.09);
+}
+
+.time-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.time-picker label span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.time-picker select {
+  padding: 11px;
+  color: var(--ink);
+  background: white;
+}
+
+.modal-error {
+  margin: 10px 0 0;
+  color: #a6443e;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .color-picker {
@@ -789,7 +844,8 @@ button {
 }
 
 .confirm-button,
-.delete-button {
+.delete-button,
+.cancel-button {
   border: 0;
   border-radius: 10px;
   padding: 11px 20px;
@@ -810,6 +866,11 @@ button {
 .delete-button {
   color: #a6443e;
   background: #f0e3df;
+}
+
+.cancel-button {
+  color: var(--ink);
+  background: #e9e8e1;
 }
 
 .toast {
@@ -842,6 +903,14 @@ button {
     margin-right: -30px;
     padding-left: 36px;
     padding-right: 36px;
+  }
+
+  .edit-timeline-layout {
+    grid-template-columns: minmax(0, 1fr) 72px;
+  }
+
+  .scroll-gutter {
+    min-width: 72px;
   }
 
 }
