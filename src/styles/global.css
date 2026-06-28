@@ -543,6 +543,7 @@ button {
   position: sticky;
   z-index: 8;
   top: 0;
+  gap: 8px;
   margin: -42px -15px 0;
   padding: 30px 20px 16px;
   background: rgba(247, 244, 238, 0.92);
@@ -576,6 +577,28 @@ button {
   font-family: "DM Mono", monospace;
   font-size: 11px;
   background: var(--green);
+}
+
+.edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clear-all-button {
+  border: 1px solid #e2c9c3;
+  border-radius: 10px;
+  padding: 7px 10px;
+  color: #a6443e;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #f6ebe8;
+}
+
+.clear-all-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .edit-guide {

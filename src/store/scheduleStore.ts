@@ -66,6 +66,7 @@ type ScheduleState = {
   addDraft: (block: ScheduleBlock) => void;
   updateDraft: (id: string, updates: Pick<ScheduleBlock, "title" | "color" | "startMinute" | "endMinute">) => void;
   removeDraft: (id: string) => void;
+  clearDraft: () => void;
   commitDraft: () => void;
   toggleDone: (id: string) => void;
   loadBlocks: () => void;
@@ -80,6 +81,7 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
   addDraft: (block) => set((state) => ({ draftBlocks: [...state.draftBlocks, block] })),
   updateDraft: (id, updates) => set((state) => ({ draftBlocks: state.draftBlocks.map((block) => block.id === id ? { ...block, ...updates } : block) })),
   removeDraft: (id) => set((state) => ({ draftBlocks: state.draftBlocks.filter((block) => block.id !== id) })),
+  clearDraft: () => set({ draftBlocks: [] }),
   commitDraft: () => { const blocks = get().draftBlocks.map((block) => ({ ...block })); set({ scheduleBlocks: blocks }); saveBlocks(blocks); },
   toggleDone: (id) => { const blocks = get().scheduleBlocks.map((block) => block.id === id ? { ...block, isDone: !block.isDone } : block); set({ scheduleBlocks: blocks }); saveBlocks(blocks); },
   loadBlocks: () => {

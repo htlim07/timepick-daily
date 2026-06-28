@@ -18,7 +18,7 @@ type ModalState = {
 } | null;
 
 export function EditPage({ onDone, onCancel }: EditPageProps) {
-  const { draftBlocks, addDraft, updateDraft, removeDraft, commitDraft } = useScheduleStore();
+  const { draftBlocks, addDraft, updateDraft, removeDraft, clearDraft, commitDraft } = useScheduleStore();
   const [modal, setModal] = useState<ModalState>(null);
   const [notice, setNotice] = useState("");
 
@@ -42,7 +42,21 @@ export function EditPage({ onDone, onCancel }: EditPageProps) {
           <span className="eyebrow">BUILD YOUR DAY</span>
           <h1>시간을 드래그하세요</h1>
         </div>
-        <span className="block-count">{draftBlocks.length}</span>
+        <div className="edit-actions">
+          <button
+            className="clear-all-button"
+            type="button"
+            disabled={draftBlocks.length === 0}
+            onClick={() => {
+              if (window.confirm("모든 일정을 지울까요? 완료하기 전에는 취소할 수 있어요.")) {
+                clearDraft();
+              }
+            }}
+          >
+            모두 지우기
+          </button>
+          <span className="block-count">{draftBlocks.length}</span>
+        </div>
       </header>
       <p className="edit-guide">10분 단위로 원하는 구간을 쓸어 선택할 수 있어요.</p>
 
